@@ -70,7 +70,7 @@ git push
 
 **Participation answer** (3 sentences): which driver's strategy differed most from the winner's, and what on the chart shows it?
 
->
+> In the 2025 Japanese Grand Prix, Lance Stroll (STR) stands out as differing most from winner Max Verstappen (VER) because he used three tyre compounds across three stints rather than two compounds across two stints. Verstappen's row changes from yellow medium tyres to gray hard tyres after lap 21, while Stroll's row changes from red soft tyres to gray hard tyres after lap 9 and then to yellow medium tyres after lap 30. The extra color segment and earlier first change show Stroll's two-stop strategy compared with Verstappen's one-stop strategy, although this chart alone cannot explain why the strategies differed or which was more effective.
 
 **Assignment** (2 or 3 sentences): pick one race. What does the race trace show that a plain chart of lap times would hide?
 
