@@ -5,7 +5,7 @@ One page, three linked charts about a real Formula 1 race, built with D3 and dat
 | Part | File | Chart | Interactions you build | Who |
 |------|------|-------|------------------------|-----|
 | A. Demo | `js/demo.js` | 1. Track outline | a button that starts an animation; transitions when the race changes | we code it together in class |
-| B. Participation | `js/participation.js` | 2. Tyre strategy | a brush (`d3.brushX`) over the chart to pick laps | in pairs, in class |
+| B. Participation | `js/participation.js` | 2. Tyre strategy | a brush (`d3.brushX`) over the chart to pick laps | in pairs or alone, due tomorrow |
 | C. Assignment | `js/assignment.js` | 3. Race trace | a hover line and tooltip (`d3.pointer`); zoom to the brushed laps; highlight a driver in both charts | alone, due in one week |
 
 The charts are linked: brushing laps in chart 2 zooms chart 3, and hovering a driver in chart 3 highlights them in chart 2. Charts talk to each other with `announce` and `listen` from `js/data.js`.
