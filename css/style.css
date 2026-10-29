@@ -1,0 +1,219 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    color: #222;
+    line-height: 1.5;
+    padding: 16px;
+}
+
+#container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 24px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 16px;
+}
+
+h2 {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+}
+
+section {
+    margin-top: 32px;
+}
+
+.question {
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+select,
+button {
+    font: inherit;
+    padding: 6px 10px;
+    border: 1px solid #888;
+    border-radius: 4px;
+    background: white;
+    max-width: 100%;
+}
+
+button {
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+
+/* Drop-downs: our own arrow, 10px from the right edge, with room so text never touches it */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 34px;
+    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23444' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 10px center;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#status {
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-size: 13px;
+}
+
+#chart1 svg {
+    max-width: 600px;
+}
+
+footer {
+    margin-top: 40px;
+    font-size: 12px;
+    color: #555;
+}
+
+/* --- Axes --------------------------------------------------------------- */
+
+.axis text {
+    fill: #555;
+}
+
+.axis-label {
+    fill: #555;
+    font-size: 12px;
+}
+
+/* --- Chart 1: track ------------------------------------------------------ */
+
+.track {
+    fill: none;
+    stroke: #222;
+    stroke-width: 4;
+}
+
+.start-dot {
+    fill: #c8102e;
+}
+
+.replay-dot {
+    fill: #1f5fbf;
+    stroke: white;
+    stroke-width: 2;
+}
+
+/* --- Chart 2: tyre compounds (each has a letter too, so color is not the only cue) --- */
+
+/* Checked with color-blindness simulation: soft (red) and intermediate (light green)
+   differ in lightness too, so they stay apart for red-green color-blind viewers. */
+.SOFT { fill: #c8102e; }
+.MEDIUM { fill: #f2c94c; }
+.HARD { fill: #9a9ca3; }
+.INTERMEDIATE { fill: #7ccf8a; }
+.WET { fill: #1f5fbf; }
+.UNKNOWN { fill: #6b5b95; }
+
+.stint-letter {
+    font-size: 11px;
+    font-weight: 700;
+    fill: white;
+    pointer-events: none;
+}
+
+.MEDIUM-letter,
+.HARD-letter,
+.INTERMEDIATE-letter {
+    fill: #222;
+}
+
+/* Legend: the same colors and letters as the bars */
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    list-style: none;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.swatch {
+    display: inline-block;
+    width: 22px;
+    height: 18px;
+    border-radius: 3px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    color: white;
+}
+
+.SOFT-swatch { background: #c8102e; }
+.MEDIUM-swatch { background: #f2c94c; color: #222; }
+.HARD-swatch { background: #9a9ca3; color: #222; }
+.INTERMEDIATE-swatch { background: #7ccf8a; color: #222; }
+.WET-swatch { background: #1f5fbf; }
+
+.brush .selection {
+    fill: #1f5fbf;
+    fill-opacity: 0.25;
+    stroke: #1f5fbf;
+}
+
+/* --- Chart 3: race trace ------------------------------------------------- */
+
+.trace-line {
+    fill: none;
+    stroke-width: 2;
+}
+
+.zero-line {
+    stroke: #222;
+}
+
+.hover-line {
+    stroke: #888;
+    stroke-dasharray: 3 3;
+}
+
+.end-label {
+    font-weight: 600;
+}
+
+/* --- Tooltip ------------------------------------------------------------- */
+
+.tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: #222;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+}

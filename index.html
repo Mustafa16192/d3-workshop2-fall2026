@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Workshop 1</title>
+     <!-- Link to external CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div id="container">
+        <!-- Header of the page -->
+        <h1>F1 Race Explorer</h1>
+
+        <!--Race selector -->
+        <div class="controls">
+            <label for="race-select">Race</label>
+            <select id="race-select"></select>
+            <span id="status"></span>
+        </div>
+
+        <!-- Class Demo -->
+        <section>
+            <h2>1. Track</h2>
+            <p class="question">What does this circuit look like? <span id="track-length"></span></p>
+            <button id="replay" type="button">Replay a lap</button>
+            <div id="chart1" class="chart"></div>
+        </section>
+
+        <!-- Participation -->
+        <section>
+            <h2>2. Tyre strategy</h2>
+            <p class="question">Who ran which tyres, and when? Who deviated from the winner's strategy?
+                <strong>Drag across the chart</strong> to zoom the race trace to those laps.</p>
+            <ul class="legend" aria-label="Tyre compounds">
+                <li><span class="swatch SOFT-swatch">S</span> Soft</li>
+                <li><span class="swatch MEDIUM-swatch">M</span> Medium</li>
+                <li><span class="swatch HARD-swatch">H</span> Hard</li>
+                <li><span class="swatch INTERMEDIATE-swatch">I</span> Intermediate (light rain)</li>
+                <li><span class="swatch WET-swatch">W</span> Wet (heavy rain)</li>
+            </ul>
+            <div id="chart2" class="chart"></div>
+        </section>
+
+        <!--Assignment-->
+        <section>
+            <h2>3. Race trace</h2>
+            <p class="question">Who gained or lost time against the reference driver, and on which laps?
+                <strong>Hover</strong> to see every gap; the nearest driver lights up in both charts.</p>
+            <label for="reference-select">Reference driver</label>
+            <select id="reference-select"></select>
+            <div id="chart3" class="chart"></div>
+        </section>
+
+        <footer>
+            Data: OpenF1 (<a href="https://openf1.org">https://openf1.org</a>). OpenF1 is an unofficial project and is
+            not associated with the Formula 1 companies. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP,
+            GRAND PRIX and related marks are trademarks of Formula One Licensing B.V.
+        </footer>
+
+    </div>
+
+    <!-- D3.js Library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Custom D3.js script to visualize charts -->
+    <script type="module" src="js/demo.js"></script>
+    <script type="module" src="js/participation.js"></script>
+    <script type="module" src="js/assignment.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "2025-japanese",
+    "label": "Japanese Grand Prix 2025",
+    "year": 2025,
+    "meeting_key": 1256,
+    "file": "races/2025-japanese.json"
+  },
+  {
+    "id": "2025-british",
+    "label": "British Grand Prix 2025",
+    "year": 2025,
+    "meeting_key": 1277,
+    "file": "races/2025-british.json"
+  },
+  {
+    "id": "2025-dutch",
+    "label": "Dutch Grand Prix 2025",
+    "year": 2025,
+    "meeting_key": 1267,
+    "file": "races/2025-dutch.json"
+  }
+]
