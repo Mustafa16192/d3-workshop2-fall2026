@@ -65,50 +65,59 @@ onRaceChange(race => {
     console.log('Outline points:', points.length, points.slice(0, 3));
 
     // TODO STEP 1: How big is the track? Use d3.extent to get [min, max] of x and of y
-    const xRange = 
-    const yRange = 
+    const xRange = d3.extent(points, d => d[0]);
+    const yRange = d3.extent(points, d => d[1]);
 
-    const trackWidth = 
-    const trackHeight = 
+    const trackWidth = xRange[1] - xRange[0];
+    const trackHeight = yRange[1] - yRange[0];
 
     // TODO STEP 2: Calculate the scale factor for both axes
     // The track length and height are way bigger than the available pixels on the screen, so we have to shrink it
     // k is the min value between two values:
     // screen width - left and right padding over the track width
     // screen height - top and bottom padding over the track height
-    // k =
+    const k = Math.min(
+        (width - 2 * padding) / trackWidth,
+        (height - 2 * padding) / trackHeight
+    );
 
     // TODO STEP 3: Center the track 
     // Right now the track would start from the top left corner of the canvas
     // We need to create an offset to start from the center
-    const offsetX = 
-    const offsetY = 
+    const offsetX = (width - trackWidth * k) / 2;
+    const offsetY = (height - trackHeight * k) / 2;
     
     
     // TODO STEP 4: Build scales x and y, using scale factor x
     const x = d3.scaleLinear()
-        .domain(/* Define domain */)
-        .range(/* Define range */)
+        .domain(xRange)
+        .range([offsetX, width - offsetX]);
 
     const y = d3.scaleLinear()
-        .domain(/* Define domain */)
-        .range(/* Define range */) // Remember: SVG y points DOWN, so flip the range of y (otherwise the circuit is mirrored)
+        .domain(yRange)
+        .range([height - offsetY, offsetY]); // Remember: SVG y points DOWN, so flip the range of y (otherwise the circuit is mirrored)
     
     // TODO STEP 5: convert the points to screen positions and set the path's "d" attribute
-    const screenPoints = points.map(d => [])
+    const screenPoints = points.map(d => [x(d[0]), y(d[1])]);
 
     // TODO STEP 6: Use a transition so the old circuit morphs into the new one when the race changes:
     // track.transition().duration(duration).attr('d', ...)
     // ...and at the end of this function: duration = 750;
+    track.transition()
+        .duration(duration)
+        .attr('d', line(screenPoints));
 
     // TODO STEP 7: move the start/finish dot and label to the first point of the lap
-    const [startX, startY] = 
+    const [startX, startY] = screenPoints[0];
     // startDot is a circle, so it means we need to define cx, cy
     // startLabel is a text, we need to define x and y
+    startDot.attr('cx', startX).attr('cy', startY);
+    startLabel.attr('x', startX + 10).attr('y', startY - 10);
 
     // Update the aria-label of the svg with the race name
     svg.attr('aria-label', `Track outline of the ${race.label}`);
     replayDot.interrupt().attr('opacity', 0);
+    duration = 750;
 });
 
 
@@ -126,9 +135,9 @@ replayButton.on('click', () => {
     // TODO STEP 8: whenever new track is selected, place the replayDot to the start of that track
     // Hint: starting point is it start.x and start.y
     replayDot.interrupt()
-        .attr(/* Define opacity */)
-        .attr(/* Define position along x axis */)
-        .attr(/* Define position along y axis */)
+        .attr('opacity', 1)
+        .attr('cx', start.x)
+        .attr('cy', start.y)
         .attr('transform', null);
 
     
@@ -137,11 +146,11 @@ replayButton.on('click', () => {
 
     // TODO STEP 9: Set animation duration to 5 seconds and specify how to translate points
     replayDot.transition()
-        .duration(/* Define duration */)
+        .duration(5000)
         .ease(d3.easeLinear) // constant speed
         .attrTween('transform', () => t => {
             const p = path.getPointAtLength(t * length);
-            return `translate(${/* Define the translation point's x axis value */}, ${/* Define the translation point's y axis value */})`;
+            return `translate(${p.x - start.x}, ${p.y - start.y})`;
         })
         // 'end' when the lap finishes, 'interrupt' when a race change stops it
         .on('end interrupt', () => replayButton.property('disabled', false));
