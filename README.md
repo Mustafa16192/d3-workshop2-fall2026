@@ -74,11 +74,11 @@ git push
 
 **Assignment** (2 or 3 sentences): pick one race. What does the race trace show that a plain chart of lap times would hide?
 
->
+> In the 2025 Japanese Grand Prix, the race trace shows how small lap-by-lap differences accumulate into a lead or deficit relative to the selected reference driver. Changes in slope reveal sustained gains or losses, while abrupt changes around pit stops can be compared with the linked tyre-strategy chart. A plain lap-time chart shows individual laps but does not directly show this accumulated gap; gaps involving imputed lap times are estimates rather than official race timing.
 
 **Bonus** (optional): which race did you add, and why?
 
->
+> I added the 2024 Monaco Grand Prix using `node scripts/fetch-race.mjs 1236` to compare a tight street circuit with the three provided circuits. I checked that its track, tyre-strategy chart, and race trace render, and tested the reference-driver selector, hover tooltip, linked highlighting, brush zoom, and reset across all four races.
 
 ---
 

@@ -44,15 +44,15 @@ function cumulativeTimes(race, driverNumber) {
     const laps = race.laps.filter(l => l.driver_number === driverNumber);
 
     const typical = d3.median(
-        laps.filter(l => /* Define which laps count: not lap 1, not a pit-in lap (l.pitIn), and with a time */),
-        l => /* Specify the value to take the median of */
+        laps.filter(l => l.lap_number !== 1 && !l.pitIn && l.lap_duration !== null),
+        l => l.lap_duration
     );
     if (typical === undefined) return []; // a driver with no usable laps at all
 
     let cumulative = 0;
     return laps.map(l => {
-        const missing = /* Define when a lap is missing: its lap_duration is null */;
-        cumulative += /* Add the typical lap when the lap is missing, otherwise the lap's own time */;
+        const missing = l.lap_duration === null;
+        cumulative += missing ? typical : l.lap_duration;
         return { lap: l.lap_number, cumulative, missing };
     });
 }
@@ -61,11 +61,11 @@ function cumulativeTimes(race, driverNumber) {
 // The reference driver's own gap must be 0 on every lap.
 function gapToReference(race, driverNumber, referenceNumber) {
     // A Map from lap number to the reference's cumulative time, so we can look it up per lap
-    const refCumulative = new Map(cumulativeTimes(race, referenceNumber).map(p => [/* Define the key: the lap */, /* Define the value: the cumulative time */]));
+    const refCumulative = new Map(cumulativeTimes(race, referenceNumber).map(p => [p.lap, p.cumulative]));
 
     return cumulativeTimes(race, driverNumber)
-        .filter(p => /* Keep only laps the reference also completed (Map has a .has method) */)
-        .map(p => ({ lap: p.lap, gap: /* Define the gap: this driver's cumulative minus the reference's cumulative */, missing: p.missing }));
+        .filter(p => refCumulative.has(p.lap))
+        .map(p => ({ lap: p.lap, gap: p.cumulative - refCumulative.get(p.lap), missing: p.missing }));
 }
 
 // ============================================================================
@@ -144,73 +144,73 @@ function draw() {
 
     // TODO STEP 3: Create the scales
     // Only the laps picked with the brush in chart 2 are visible (all laps when lapRange is null)
-    const [firstLap, lastLap] = /* Define: lapRange, or [1, race.maxLap] when lapRange is null (use ??) */;
-    const visible = v => /* Define: true when v.lap is between firstLap and lastLap */;
+    const [firstLap, lastLap] = lapRange ?? [1, race.maxLap];
+    const visible = v => v.lap >= firstLap && v.lap <= lastLap;
     const allGaps = series.flatMap(s => s.values.filter(visible).map(v => v.gap));
 
-    x.domain(/* Define the domain: the visible laps */);
-    y.domain(d3.extent(/* Define the values: all visible gaps AND 0, so the zero line always shows */)).nice();
+    x.domain([firstLap, lastLap]);
+    y.domain(d3.extent([...allGaps, 0])).nice();
 
     // TODO STEP 4: Create the axes first, then call them on their groups
     // x axis: whole laps only, d3.format('d'); at most 10 ticks, .ticks(Math.min(10, lastLap - firstLap))
     // y axis: ticks like "+10 s" / "-5 s" (a "+" in front of positive gaps)
-    const xAxis = /* Create the x axis from the x scale */;
-    const yAxis = /* Create the y axis from the y scale */;
+    const xAxis = d3.axisBottom(x).ticks(Math.min(10, lastLap - firstLap)).tickFormat(d3.format('d'));
+    const yAxis = d3.axisLeft(y).tickFormat(d => `${d > 0 ? '+' : ''}${d} s`);
 
-    xAxisGroup.transition().duration(/* Define duration */).call(/* Call the x axis */);
-    yAxisGroup.transition().duration(/* Define duration */).call(/* Call the y axis */);
+    xAxisGroup.transition().duration(duration).call(xAxis);
+    yAxisGroup.transition().duration(duration).call(yAxis);
 
     // TODO STEP 5: Draw the zero line (the reference driver) across the chart, and label it
     zeroLine.transition().duration(duration)
-        .attr(/* Define the starting x */)
-        .attr(/* Define the ending x */)
-        .attr(/* Define the starting y */)
-        .attr(/* Define the ending y */);
-    zeroLabel.text(/* Define the text: "<reference acronym> (reference)" */)
+        .attr('x1', margin.left)
+        .attr('x2', width - margin.right)
+        .attr('y1', y(0))
+        .attr('y2', y(0));
+    zeroLabel.text(`${refName} (reference)`)
         .transition().duration(duration)
-        .attr(/* Define x: the middle of the plot area */)
-        .attr(/* Define y: 6 px above the zero line */);
+        .attr('x', (margin.left + width - margin.right) / 2)
+        .attr('y', y(0) - 6);
 
     // TODO STEP 6: One line per driver, keyed by driver number
     const line = d3.line()
-        .x(d => /* Define x: the lap */)
-        .y(d => /* Define y: the gap */);
+        .x(d => x(d.lap))
+        .y(d => y(d.gap));
 
     linesGroup.selectAll('path')
-        .data(series, /* Define the key: the driver's number */)
+        .data(series, s => s.driver.driver_number)
         .join('path')
         .attr('class', 'trace-line')
-        .attr('stroke', s => /* Define the color: the driver's team color */)
-        .attr('stroke-dasharray', s => /* Dashed ('6 4') for the second driver of a team (s.driver.dash), otherwise null */)
+        .attr('stroke', s => s.driver.color)
+        .attr('stroke-dasharray', s => s.driver.dash ? '6 4' : null)
         .transition().duration(duration)
-        .attr('d', s => /* Draw the line from the driver's values */);
+        .attr('d', s => line(s.values));
 
     // TODO STEP 7: Labels at the end of each line (the last lap you can see), pushed apart so they do not overlap
     const ends = series
         .filter(s => s.values.some(visible))
         .map(s => {
             const last = s.values.filter(visible).at(-1);
-            return { driver: s.driver, lap: last.lap, y: /* Define the label height: y of the last gap */ };
+            return { driver: s.driver, lap: last.lap, y: y(last.gap) };
         })
         .sort((a, b) => a.y - b.y);
     ends.forEach((d, i) => {
         // If a label is less than 14 px below the one above it, push it down
-        if (i > 0 && d.y < ends[i - 1].y + 14) d.y = /* Define the new height */;
+        if (i > 0 && d.y < ends[i - 1].y + 14) d.y = ends[i - 1].y + 14;
     });
 
     labelsGroup.selectAll('text')
         .data(ends, d => d.driver.driver_number)
         .join('text')
         .attr('class', 'end-label')
-        .attr('fill', d => /* Define the color: the driver's team color */)
+        .attr('fill', d => d.driver.color)
         .attr('dy', '0.35em')
-        .text(d => /* Define the text: the driver's three-letter name */)
+        .text(d => d.driver.name_acronym)
         .transition().duration(duration)
-        .attr('x', d => /* Define x: just right of the last visible lap (+6 px) */)
+        .attr('x', d => x(d.lap) + 6)
         .attr('y', d => d.y);
 
     // TODO STEP 8: from the next change on, animate
-    duration = /* Define duration: 750 */;
+    duration = 750;
 }
 
 // ============================================================================
@@ -240,8 +240,8 @@ onRaceChange(newRace => {
 // ============================================================================
 
 // TODO STEP 10: chart 2 announces 'lapRange' when you brush. Remember it and redraw.
-listen(/* Define the message name */, range => {
-    lapRange = /* Define: the range chart 2 sent */;
+listen('lapRange', range => {
+    lapRange = range;
     draw();
 });
 
@@ -255,8 +255,8 @@ function highlight(driverNumber) {
     if (driverNumber === hoverDriver) return; // nothing changed
     hoverDriver = driverNumber;
     linesGroup.selectAll('path')
-        .attr('opacity', s => /* Define opacity */);
-    announce(/* Define the message name */, driverNumber);    // chart 2 fades the other drivers' bars
+        .attr('opacity', s => driverNumber === null || s.driver.driver_number === driverNumber ? 1 : 0.25);
+    announce('hoverDriver', driverNumber);    // chart 2 fades the other drivers' bars
 }
 
 // TODO STEP 9: a transparent rect over the plot area catches the mouse
@@ -270,24 +270,24 @@ svg.append('rect')
         // The mouse position in pixels, and the lap under it (kept inside the visible laps)
         const [mx, my] = d3.pointer(event);
         const [firstLap, lastLap] = x.domain();
-        const lap = Math.max(firstLap, Math.min(lastLap, Math.round(/* Define: turn the mouse x back into a lap */)));
+        const lap = Math.max(firstLap, Math.min(lastLap, Math.round(x.invert(mx))));
 
         // The vertical line at that lap
         hoverLine
-            .attr('opacity', /* Define opacity */)
-            .attr(/* Define the starting x */)
-            .attr(/* Define the ending x */)
-            .attr(/* Define the starting y */)
-            .attr(/* Define the ending y */);
+            .attr('opacity', 1)
+            .attr('x1', x(lap))
+            .attr('x2', x(lap))
+            .attr('y1', margin.top)
+            .attr('y2', height - margin.bottom);
 
         // Every driver's gap on that lap, from ahead to behind
         const points = series
-            .map(s => ({ driver: s.driver, point: s.values.find(v => /* Define: the value for this lap */) }))
+            .map(s => ({ driver: s.driver, point: s.values.find(v => v.lap === lap) }))
             .filter(r => r.point)
-            .sort((a, b) => /* Define the order: smallest gap first */);
+            .sort((a, b) => a.point.gap - b.point.gap);
 
         // TODO STEP 11 (continued): the driver whose line is nearest to the mouse on this lap
-        const nearest = d3.least(points, r => /* Define the distance in pixels between the line and the mouse (Math.abs, my) */);
+        const nearest = d3.least(points, r => Math.abs(y(r.point.gap) - my));
         highlight(nearest ? nearest.driver.driver_number : null);
 
         const rows = points.map(r => {
@@ -298,15 +298,15 @@ svg.append('rect')
         // Show the tooltip next to the mouse
         tooltip
             .attr('hidden', null)
-            .style('left', /* Define: 14 px right of the mouse (event.clientX) */)
-            .style('top', /* Define: 14 px below the mouse (event.clientY) */)
+            .style('left', `${event.clientX + 14}px`)
+            .style('top', `${event.clientY + 14}px`)
             .html(`<strong>Lap ${lap}</strong><br>${rows.join('<br>')}`);
     })
     .on('mouseleave', () => {
         // Hide the line and the tooltip, and stop highlighting (STEP 11)
-        hoverLine.attr('opacity', /* Define opacity */);
+        hoverLine.attr('opacity', 0);
         tooltip.attr('hidden', '');
-        highlight(/* Define: no driver */);
+        highlight(null);
     });
 
 // TODO STEP 12: in participation.js (at the bottom), listen to 'hoverDriver' and fade the
